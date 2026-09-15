@@ -1,0 +1,31 @@
+# Архитектура
+
+## Границы
+
+`denoise-analytics` — отдельный read-only reporting-сервис. Он не создаёт и не изменяет кампании, объявления, настройки GA4 или Search Console. Изменения в рекламных аккаунтах выполняются только после анализа и отдельного подтверждения владельца.
+
+```text
+Browser
+  -> analytics.denoisebcn.com (HTTPS via existing Caddy)
+  -> denoise-analytics:8080 (private shared Docker network)
+  -> Google Analytics Data API
+  -> Google Ads API
+  -> Search Console API
+```
+
+## Безопасность
+
+- Вход закрыт HTTP Basic Auth поверх TLS.
+- Google service account подключается к контейнеру read-only и не попадает в Git или образ.
+- Все Google-интеграции используют только scopes чтения, кроме стандартного scope Google Ads `adwords`; само приложение выполняет исключительно GAQL `SELECT`.
+- API и HTML не кэшируются браузером; включены CSP, `X-Frame-Options`, `nosniff` и `no-referrer`.
+- Панель имеет `noindex`, не публикует порт 8080 на хосте и доступна только через reverse proxy.
+
+## Обновление данных
+
+Панель запрашивает выбранный период по требованию и держит результат в памяти 15 минут. Ошибка одного источника не скрывает данные остальных. Search Console обычно имеет задержку финальных данных, поэтому время формирования отчёта и состояние каждого источника показываются отдельно.
+
+## Production network
+
+Оба Compose-проекта подключаются к внешней сети `denoise_public`. Caddy остаётся единственной точкой, слушающей публичные порты 80/443.
+

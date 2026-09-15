@@ -1,0 +1,37 @@
+name: denoise-analytics
+
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: denoise-analytics
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    expose:
+      - "8080"
+    volumes:
+      - ../secrets/google-service-account.json:/run/secrets/google-service-account.json:ro
+    networks:
+      - public_gateway
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  public_gateway:
+    external: true
+    name: denoise_public

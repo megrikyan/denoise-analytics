@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <title>DE | NOISE — Analytics</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">DE | NOISE</p>
+          <h1>Пульс бизнеса</h1>
+          <p class="subtitle">Реклама, сайт и органический поиск — в одном отчёте.</p>
+        </div>
+        <div class="period">
+          <label>С <input id="start-date" type="date"></label>
+          <label>По <input id="end-date" type="date"></label>
+          <button id="refresh" type="button">Обновить</button>
+        </div>
+      </header>
+
+      <section id="notice" class="notice hidden" aria-live="polite"></section>
+
+      <section class="kpis" aria-label="Главные показатели">
+        <article class="kpi accent"><span>Расходы на рекламу</span><strong id="kpi-spend">—</strong><small id="kpi-spend-note">Google Ads</small></article>
+        <article class="kpi"><span>Записанные конверсии</span><strong id="kpi-conversions">—</strong><small id="kpi-conversions-note">Google Ads</small></article>
+        <article class="kpi"><span>Стоимость конверсии</span><strong id="kpi-cpa">—</strong><small>Расход / конверсии</small></article>
+        <article class="kpi"><span>Сеансы сайта</span><strong id="kpi-sessions">—</strong><small>Google Analytics</small></article>
+        <article class="kpi"><span>Клики из поиска</span><strong id="kpi-organic">—</strong><small>Search Console</small></article>
+        <article class="kpi"><span>Ценность / расходы</span><strong id="kpi-roas">—</strong><small>Google Ads ROAS</small></article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel chart-panel">
+          <div class="panel-head"><div><p class="eyebrow">Динамика</p><h2>Что происходило по дням</h2></div><div class="legend"><span class="dot spend"></span>Расходы <span class="dot conversions"></span>Конверсии</div></div>
+          <div id="trend-chart" class="chart" aria-label="График расходов и конверсий"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Контроль</p><h2>Источники данных</h2></div></div>
+          <div id="source-status" class="source-list"></div>
+          <p id="generated-at" class="timestamp"></p>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">Google Ads</p><h2>Кампании</h2></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Кампания</th><th>Расходы</th><th>Клики</th><th>Конверсии</th><th>CPA</th><th>Ценность</th></tr></thead><tbody id="campaigns"></tbody></table></div>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Google Analytics</p><h2>Каналы сайта</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Канал</th><th>Сеансы</th><th>Ключевые события</th></tr></thead><tbody id="channels"></tbody></table></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Search Console</p><h2>Поисковые запросы</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Запрос</th><th>Клики</th><th>Показы</th><th>CTR</th><th>Позиция</th></tr></thead><tbody id="queries"></tbody></table></div>
+        </article>
+      </section>
+    </main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
+
