@@ -2,6 +2,12 @@
 
 ## Один service account
 
+Production service account:
+
+```text
+denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
+```
+
 Создайте отдельный Google Cloud project, включите в нём:
 
 1. Google Analytics Data API;
@@ -52,4 +58,3 @@ GOOGLE_ADS_CUSTOMER_ID
 GOOGLE_ADS_LOGIN_CUSTOMER_ID
 GOOGLE_ADS_DEVELOPER_TOKEN
 ```
-
