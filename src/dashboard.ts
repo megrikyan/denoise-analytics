@@ -20,7 +20,11 @@ export class DashboardService {
       googleAds:
         credentials &&
         Boolean(this.config.googleAdsCustomerId),
-      searchConsole: credentials && Boolean(this.config.searchConsoleSiteUrl),
+      searchConsoleEnabled: this.config.searchConsoleEnabled,
+      searchConsole:
+        this.config.searchConsoleEnabled &&
+        credentials &&
+        Boolean(this.config.searchConsoleSiteUrl),
     };
   }
 
@@ -33,7 +37,11 @@ export class DashboardService {
     const [googleAnalytics, googleAds, searchConsole] = await Promise.all([
       this.runSource(status.googleAnalytics, () => fetchGoogleAnalytics(this.config, range)),
       this.runSource(status.googleAds, () => fetchGoogleAds(this.config, range)),
-      this.runSource(status.searchConsole, () => fetchSearchConsole(this.config, range)),
+      this.runSource(
+        status.searchConsole,
+        () => fetchSearchConsole(this.config, range),
+        !status.searchConsoleEnabled,
+      ),
     ]);
     const report: DashboardReport = {
       range,
@@ -47,7 +55,12 @@ export class DashboardService {
     return report;
   }
 
-  private async runSource<T>(configured: boolean, load: () => Promise<T>): Promise<SourceResult<T>> {
+  private async runSource<T>(
+    configured: boolean,
+    load: () => Promise<T>,
+    disabled = false,
+  ): Promise<SourceResult<T>> {
+    if (disabled) return { configured: false, disabled: true };
     if (!configured) return { configured: false };
     try {
       return { configured: true, fetchedAt: new Date().toISOString(), data: await load() };

@@ -23,8 +23,8 @@
     var labels = { googleAnalytics: 'Google Analytics', googleAds: 'Google Ads', searchConsole: 'Search Console' };
     document.getElementById('source-status').innerHTML = Object.keys(labels).map(function (key) {
       var source = report.sources[key];
-      var state = !source.configured ? ['Не подключён', 'off'] : source.error ? ['Ошибка', 'error'] : ['Работает', ''];
-      var detail = source.error ? source.error : !source.configured ? 'Ожидает доступа Google' : 'Данные получены';
+      var state = source.disabled ? ['Отложен', 'off'] : !source.configured ? ['Не подключён', 'off'] : source.error ? ['Ошибка', 'error'] : ['Работает', ''];
+      var detail = source.disabled ? 'Ресурс пока не создан' : source.error ? source.error : !source.configured ? 'Ожидает доступа Google' : 'Данные получены';
       return '<div class="source"><div><strong>' + labels[key] + '</strong><small>' + safe(detail) + '</small></div><span class="badge ' + state[1] + '">' + state[0] + '</span></div>';
     }).join('');
   }
@@ -75,7 +75,7 @@
     ], 6);
     table('channels', ga ? ga.channels : [], [function (r) { return safe(r.name); }, function (r) { return decimal(r.sessions); }, function (r) { return decimal(r.keyEvents); }], 3);
     table('queries', search ? search.queries : [], [function (r) { return safe(r.name); }, function (r) { return decimal(r.organicClicks); }, function (r) { return decimal(r.organicImpressions); }, function (r) { return percent(r.ctr); }, function (r) { return decimal(r.position); }], 5);
-    var disconnected = Object.keys(report.sources).filter(function (key) { return !report.sources[key].configured; });
+    var disconnected = Object.keys(report.sources).filter(function (key) { return !report.sources[key].configured && !report.sources[key].disabled; });
     notice.classList.toggle('hidden', disconnected.length === 0);
     if (disconnected.length) notice.textContent = 'Панель готова к подключению. Сейчас необходимо выдать сервисному аккаунту Google доступ к источникам данных.';
   }
@@ -97,4 +97,3 @@
   refreshButton.addEventListener('click', function () { load(true); });
   defaults(); load(false);
 })();
-

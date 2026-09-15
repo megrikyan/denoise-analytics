@@ -37,6 +37,7 @@ export interface RankedRow {
 
 export interface SourceResult<T> {
   configured: boolean;
+  disabled?: boolean;
   fetchedAt?: string;
   data?: T;
   error?: string;
@@ -87,4 +88,3 @@ export interface DashboardReport {
     searchConsole: SourceResult<SearchConsoleReport>;
   };
 }
-

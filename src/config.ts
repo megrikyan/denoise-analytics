@@ -7,6 +7,7 @@ export interface AppConfig {
   password: string;
   credentialsPath: string;
   ga4PropertyId: string | null;
+  searchConsoleEnabled: boolean;
   searchConsoleSiteUrl: string | null;
   googleAdsCustomerId: string | null;
   googleAdsLoginCustomerId: string | null;
@@ -25,6 +26,13 @@ function positiveInteger(name: string, fallback: number): number {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function booleanValue(name: string, fallback: boolean): boolean {
+  const value = process.env[name]?.trim().toLowerCase();
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return fallback;
+}
+
 export function loadConfig(): AppConfig {
   const username = optional('DASHBOARD_USERNAME');
   const password = optional('DASHBOARD_PASSWORD');
@@ -41,6 +49,7 @@ export function loadConfig(): AppConfig {
       optional('GOOGLE_APPLICATION_CREDENTIALS') ??
       '/run/secrets/google-service-account.json',
     ga4PropertyId: optional('GA4_PROPERTY_ID'),
+    searchConsoleEnabled: booleanValue('SEARCH_CONSOLE_ENABLED', false),
     searchConsoleSiteUrl: optional('SEARCH_CONSOLE_SITE_URL'),
     googleAdsCustomerId: optional('GOOGLE_ADS_CUSTOMER_ID')?.replaceAll('-', '') ?? null,
     googleAdsLoginCustomerId:

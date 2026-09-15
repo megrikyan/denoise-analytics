@@ -52,6 +52,7 @@ denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
 
 ```text
 GA4_PROPERTY_ID
+SEARCH_CONSOLE_ENABLED
 SEARCH_CONSOLE_SITE_URL
 GOOGLE_ADS_CUSTOMER_ID
 GOOGLE_ADS_LOGIN_CUSTOMER_ID
