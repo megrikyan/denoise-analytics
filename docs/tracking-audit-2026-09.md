@@ -23,7 +23,9 @@
 - На `denoise_booking_success` запускается отдельная Google Ads conversion action с label `XPCVCK2BhIIaEMuGxO89`.
 - На том же событии включён сбор user-provided data: email извлекается CSS-селектором из экрана успешной записи для Enhanced Conversions.
 - В контейнере опубликовано не менее 11 Ads conversion tags, преимущественно на клики по меню, контактам, Instagram, WhatsApp и кнопкам записи.
-- Одновременно загружаются две GA4 destinations. Без доступа к GA4 пока нельзя определить, это два разных property, связанный destination или ошибочное дублирование.
+- Одновременно загружаются две GA4 destinations одного property: основной поток
+  `G-N633FDVBH6` и поток Altegio `G-TFKJTBTJKV`. Это ошибочно дублирует события
+  основного сайта в одном GA4 property.
 
 ## Риски и вопросы
 
@@ -33,12 +35,72 @@
 4. Событие записи технически корректное, но требуется сверка GA4 DebugView/Realtime, Ads diagnostics и фактической записи в Altegio.
 5. Виджет пока не передаёт собственные этапы воронки (открытие, выбор услуги, выбор слота, ошибка). Из-за этого нельзя объяснить, где теряются потенциальные клиенты.
 
-## Следующая проверка после выдачи доступов
+## Конфигурация GA4 через Admin API
 
-- Admin API/интерфейс GA4: property, streams, key events, Ads links, data retention, unwanted referrals и cross-domain.
-- Google Ads: conversion actions, primary/secondary, attribution, counting, windows, values, campaign goals, search terms, negatives, geo/language, budgets и bidding.
-- Search Console: property coverage, sitemap, indexing, brand/non-brand queries, countries, devices and landing pages.
-- Один контролируемый тестовый booking от входа с размеченной ссылки до Altegio, GA4 и Google Ads.
+- Оба web stream находятся в property `446056209`.
+- Property связано с нужным Google Ads customer `214-463-1342`.
+- Currency: `EUR`.
+- Property timezone ошибочно установлен как `Atlantic/Canary`; для салона в
+  Barcelona нужен `Europe/Madrid`.
+- Event и user data retention: 14 месяцев, reset on new activity включён.
+- Attribution: data-driven, lookback 30 дней для acquisition и 90 дней для
+  остальных conversion events.
+- Custom dimensions отсутствуют.
+- Key events: `purchase`, `Schedule`, `master_selected`, `booked`.
+- `denoise_booking_success` или эквивалентное событие новой формы отсутствует.
+
+За последние 30 дней основной hostname почти полностью отправлял каждое событие
+в оба stream:
+
+| Stream | Hostname | Sessions | Events |
+| --- | --- | ---: | ---: |
+| DENOISE | `denoisebcn.com` | 1 286 | 7 044 |
+| Altegio | `denoisebcn.com` | 1 282 | 7 000 |
+
+Session/user metrics без stream dimension могут дедуплицироваться, но event
+metrics и разрезы по stream искажены. Altegio stream нужно убрать с Tilda, но не
+удалять из property: реальный старый booking flow всё ещё используется.
+
+На `n1218825.alteg.io` за тот же период было 184 sessions, а события продолжали
+приходить вплоть до 14 сентября 2026. Источники включают direct, organic,
+Instagram и referrals с `denoisebcn.com`. Сырые 54 события `booked` нельзя без
+сверки считать 54 записями: рядом наблюдаются 27 `Schedule`, а кратность событий
+указывает на возможное повторное срабатывание в старой интеграции.
+
+## Конфигурация GTM через API
+
+- Read-only доступ подтверждён.
+- Published container version: `20`.
+- Default Workspace совпадает с live version; неопубликованных изменений нет.
+- Live version содержит 25 tags, 14 triggers и 4 variables.
+- Custom Event trigger `denoise_booking_success` запускает Ads tag
+  `AW - Thank-you Page` и Enhanced Conversions tag.
+- Ads tag не содержит value, currency или transaction ID.
+- GA4 Event tag на `denoise_booking_success` отсутствует.
+- Altegio GA4 tag запускается на всех страницах основного сайта.
+- Conversion Linker всё ещё содержит `n1218825.alteg.io` в cross-domain domains.
+- У всех проверенных Google и Meta tags consent status — `notSet`; отдельного
+  Consent Mode/CMP tag в контейнере нет.
+- Enhanced Conversions получает email автоматическим DOM detection; отдельная
+  переменная с жёстким CSS selector также остаётся в контейнере.
+
+## Следующая проверка и исправление
+
+1. Исправить GA4 timezone на `Europe/Madrid`.
+2. Остановить отправку Tilda-событий в Altegio stream, сохранив сам stream и его
+   историю для пока ещё используемого старого flow.
+3. Добавить Data Layer Variables для value, currency, booking reference, service
+   и staff.
+4. Отправлять подтверждённую запись новой формы в основной GA4 stream и отметить
+   её единственным основным booking key event после теста.
+5. Передавать в Ads tag динамические value/currency и booking reference как
+   transaction ID.
+6. Провести один контролируемый booking от размеченного входа до Altegio, GA4 и
+   Google Ads.
+7. После подтверждения нового сигнала сделать старые booking events и
+   микроконверсии secondary.
+8. Отдельно внедрить CMP/Consent Mode v2 до дальнейшего расширения рекламного
+   tracking.
 
 ## API-аудит после подключения
 
