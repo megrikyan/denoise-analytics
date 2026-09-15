@@ -6,10 +6,12 @@
 
 ## Состояние
 
-- каркас панели и read-only Google API connectors реализованы;
+- панель развёрнута и доступна только после авторизации;
+- read-only Google API connectors реализованы;
 - production-поддомен: `analytics.denoisebcn.com`;
 - DNS `A`: `204.168.178.49`;
-- до запуска нужны Google service account, идентификаторы ресурсов и пароль панели;
+- TLS выпускается и обновляется автоматически через общий Caddy;
+- для появления реальных данных нужны Google service account и идентификаторы ресурсов;
 - изменения рекламных кампаний через API намеренно не поддерживаются.
 
 ## Локальная проверка
@@ -21,6 +23,7 @@
 ## Документация
 
 - [Архитектура](docs/architecture.md)
+- [Эксплуатация](docs/operations.md)
 - [Доступы Google](docs/google-access.md)
 - [Модель метрик](docs/metrics.md)
 - [Первичный аудит tracking](docs/tracking-audit-2026-09.md)
