@@ -13,7 +13,7 @@ services:
     expose:
       - "8080"
     volumes:
-      - ../secrets/google-service-account.json:/run/secrets/google-service-account.json:ro
+      - ../secrets:/run/secrets:ro
     networks:
       - public_gateway
     healthcheck:
