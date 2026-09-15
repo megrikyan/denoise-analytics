@@ -20,7 +20,7 @@ denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
 /opt/denoise-analytics/secrets/google-service-account.json
 ```
 
-Файл должен иметь права `0600`, каталог — `0700`. Не отправляйте ключ в чат и не добавляйте его в Git.
+Каталог должен принадлежать группе контейнера `1000` с правами `0750`, а файл — `root:1000` с правами `0640`. Так ключ доступен только root и непривилегированному runtime-пользователю `node`. Не отправляйте ключ в чат и не добавляйте его в Git.
 
 ## Google Analytics 4
 
@@ -32,6 +32,8 @@ Production property:
 Property ID: 446056209
 Stream: DENOISE / 8262999383 / G-N633FDVBH6
 ```
+
+Analytics Data API подключён. Для программного аудита key events, data streams и связей необходимо также включить **Google Analytics Admin API** в том же Cloud project.
 
 Официальная инструкция: https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart
 
@@ -52,6 +54,8 @@ Stream: DENOISE / 8262999383 / G-N633FDVBH6
 С 9 сентября 2026 года developer token упразднён. Уровень API-доступа теперь назначается Google Cloud project, которому принадлежит service account. Для чтения production-аккаунта проект должен получить как минимум **Explorer access** на странице Google Ads API Overview в Cloud Console. Панель использует Google Ads API `v25` и только отчётные `SELECT`-запросы.
 
 Production customer ID: `214-463-1342`.
+
+Service account имеет Read-only access, а Explorer access подтверждён успешным production API-запросом.
 
 Официальная инструкция: https://developers.google.com/google-ads/api/docs/get-started/make-first-call
 

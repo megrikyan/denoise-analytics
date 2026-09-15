@@ -30,8 +30,8 @@ cd /opt/denoise-analytics
 
 - `.env` и каталог `secrets/` исключены из Git и Docker build context;
 - `.env` должен иметь права `0600`;
-- `secrets/` — `0700`;
-- `secrets/google-service-account.json` — `0600`;
+- `secrets/` — `root:1000`, права `0750`;
+- `secrets/google-service-account.json` — `root:1000`, права `0640`;
 - пароль панели ротируется заменой `DASHBOARD_PASSWORD` в `.env` с последующим deploy.
 
 ## Диагностика
@@ -43,4 +43,3 @@ curl -fsS https://analytics.denoisebcn.com/health
 ```
 
 `/health` проверяет процесс без авторизации. `/ready` дополнительно показывает, какие Google sources настроены, но не раскрывает токены.
-
