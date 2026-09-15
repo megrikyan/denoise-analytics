@@ -10,7 +10,6 @@ export interface AppConfig {
   searchConsoleSiteUrl: string | null;
   googleAdsCustomerId: string | null;
   googleAdsLoginCustomerId: string | null;
-  googleAdsDeveloperToken: string | null;
   googleAdsApiVersion: string;
   cacheTtlSec: number;
   maxDays: number;
@@ -46,7 +45,6 @@ export function loadConfig(): AppConfig {
     googleAdsCustomerId: optional('GOOGLE_ADS_CUSTOMER_ID')?.replaceAll('-', '') ?? null,
     googleAdsLoginCustomerId:
       optional('GOOGLE_ADS_LOGIN_CUSTOMER_ID')?.replaceAll('-', '') ?? null,
-    googleAdsDeveloperToken: optional('GOOGLE_ADS_DEVELOPER_TOKEN'),
     googleAdsApiVersion: optional('GOOGLE_ADS_API_VERSION') ?? 'v25',
     cacheTtlSec: positiveInteger('REPORT_CACHE_TTL_SEC', 900),
     maxDays: positiveInteger('REPORT_MAX_DAYS', 366),
@@ -56,4 +54,3 @@ export function loadConfig(): AppConfig {
 export function hasGoogleCredentials(config: AppConfig): boolean {
   return existsSync(config.credentialsPath);
 }
-

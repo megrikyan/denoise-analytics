@@ -19,8 +19,7 @@ export class DashboardService {
       googleAnalytics: credentials && Boolean(this.config.ga4PropertyId),
       googleAds:
         credentials &&
-        Boolean(this.config.googleAdsCustomerId) &&
-        Boolean(this.config.googleAdsDeveloperToken),
+        Boolean(this.config.googleAdsCustomerId),
       searchConsole: credentials && Boolean(this.config.searchConsoleSiteUrl),
     };
   }
@@ -61,4 +60,3 @@ export class DashboardService {
     }
   }
 }
-

@@ -18,8 +18,8 @@ interface AdsChunk { results?: AdsResult[] }
 const micros = (value?: string): number => Number(value ?? 0) / 1_000_000;
 
 export async function fetchGoogleAds(config: AppConfig, range: DateRange): Promise<AdsReport> {
-  if (!config.googleAdsCustomerId || !config.googleAdsDeveloperToken) {
-    throw new Error('GOOGLE_ADS_CUSTOMER_ID or GOOGLE_ADS_DEVELOPER_TOKEN is not configured.');
+  if (!config.googleAdsCustomerId) {
+    throw new Error('GOOGLE_ADS_CUSTOMER_ID is not configured.');
   }
   const client = new GoogleClient(config.credentialsPath, [
     'https://www.googleapis.com/auth/adwords',
@@ -41,9 +41,7 @@ export async function fetchGoogleAds(config: AppConfig, range: DateRange): Promi
       AND campaign.status != 'REMOVED'
     ORDER BY segments.date
   `;
-  const headers: Record<string, string> = {
-    'developer-token': config.googleAdsDeveloperToken,
-  };
+  const headers: Record<string, string> = {};
   if (config.googleAdsLoginCustomerId) {
     headers['login-customer-id'] = config.googleAdsLoginCustomerId;
   }

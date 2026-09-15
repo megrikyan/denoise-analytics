@@ -40,10 +40,9 @@ denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
 
 - Customer ID рекламного аккаунта;
 - Manager Customer ID, если доступ идёт через manager account;
-- developer token с доступом к production;
 - доступ service account к рекламному или manager account.
 
-Google Ads требует одновременно OAuth/service-account credentials и developer token. Панель использует Google Ads API `v25` и только отчётные `SELECT`-запросы.
+С 9 сентября 2026 года developer token упразднён. Уровень API-доступа теперь назначается Google Cloud project, которому принадлежит service account. Для чтения production-аккаунта проект должен получить как минимум **Explorer access** на странице Google Ads API Overview в Cloud Console. Панель использует Google Ads API `v25` и только отчётные `SELECT`-запросы.
 
 Официальная инструкция: https://developers.google.com/google-ads/api/docs/get-started/make-first-call
 
@@ -56,5 +55,4 @@ GA4_PROPERTY_ID
 SEARCH_CONSOLE_SITE_URL
 GOOGLE_ADS_CUSTOMER_ID
 GOOGLE_ADS_LOGIN_CUSTOMER_ID
-GOOGLE_ADS_DEVELOPER_TOKEN
 ```
