@@ -13,7 +13,7 @@
         <div>
           <p class="eyebrow">DE | NOISE</p>
           <h1>Пульс бизнеса</h1>
-          <p class="subtitle">Реклама, сайт и органический поиск — в одном отчёте.</p>
+          <p class="subtitle">Реклама, сайт, записи и фактическая выручка — в одном отчёте.</p>
         </div>
         <div class="period">
           <label>С <input id="start-date" type="date"></label>
@@ -26,11 +26,25 @@
 
       <section class="kpis" aria-label="Главные показатели">
         <article class="kpi accent"><span>Расходы на рекламу</span><strong id="kpi-spend">—</strong><small id="kpi-spend-note">Google Ads</small></article>
-        <article class="kpi"><span>Записанные конверсии</span><strong id="kpi-conversions">—</strong><small id="kpi-conversions-note">Google Ads</small></article>
-        <article class="kpi"><span>Стоимость конверсии</span><strong id="kpi-cpa">—</strong><small>Расход / конверсии</small></article>
-        <article class="kpi"><span>Сеансы сайта</span><strong id="kpi-sessions">—</strong><small>Google Analytics</small></article>
-        <article class="kpi"><span>Клики из поиска</span><strong id="kpi-organic">—</strong><small>Search Console</small></article>
-        <article class="kpi"><span>Ценность / расходы</span><strong id="kpi-roas">—</strong><small>Google Ads ROAS</small></article>
+        <article class="kpi"><span>Выручка салона</span><strong id="kpi-revenue">—</strong><small id="kpi-revenue-note">Altegio</small></article>
+        <article class="kpi"><span>Все записи</span><strong id="kpi-appointments">—</strong><small id="kpi-appointments-note">Altegio</small></article>
+        <article class="kpi"><span>Состоявшиеся визиты</span><strong id="kpi-completed">—</strong><small id="kpi-completed-note">Altegio</small></article>
+        <article class="kpi"><span>Online-записи</span><strong id="kpi-online">—</strong><small id="kpi-online-note">Altegio</small></article>
+        <article class="kpi"><span>Средний чек</span><strong id="kpi-average-check">—</strong><small>Altegio</small></article>
+        <article class="kpi"><span>Загрузка</span><strong id="kpi-occupancy">—</strong><small id="kpi-occupancy-note">Рабочее время</small></article>
+        <article class="kpi"><span>Google conversions</span><strong id="kpi-conversions">—</strong><small>Не равны реальным записям</small></article>
+      </section>
+
+      <section class="grid two equal">
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Altegio</p><h2>Источники записей</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Источник</th><th>Записи</th></tr></thead><tbody id="altegio-sources"></tbody></table></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Altegio</p><h2>Статусы визитов</h2></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Статус</th><th>Количество</th></tr></thead><tbody id="altegio-statuses"></tbody></table></div>
+          <p id="altegio-cancel-note" class="timestamp"></p>
+        </article>
       </section>
 
       <section class="grid two">
@@ -46,7 +60,7 @@
       </section>
 
       <section class="panel">
-        <div class="panel-head"><div><p class="eyebrow">Google Ads</p><h2>Кампании</h2></div></div>
+          <div class="panel-head"><div><p class="eyebrow">Google Ads</p><h2>Кампании</h2><p class="panel-note">Конверсии ниже — исторические сигналы Google, а не подтверждённые визиты.</p></div></div>
         <div class="table-wrap"><table><thead><tr><th>Кампания</th><th>Расходы</th><th>Клики</th><th>Конверсии</th><th>CPA</th><th>Ценность</th></tr></thead><tbody id="campaigns"></tbody></table></div>
       </section>
 
@@ -64,4 +78,3 @@
     <script src="/app.js" defer></script>
   </body>
 </html>
-

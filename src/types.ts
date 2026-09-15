@@ -1,4 +1,4 @@
-export type SourceName = 'googleAnalytics' | 'googleAds' | 'searchConsole';
+export type SourceName = 'googleAnalytics' | 'googleAds' | 'searchConsole' | 'altegio';
 
 export interface DateRange {
   startDate: string;
@@ -79,12 +79,42 @@ export interface SearchConsoleReport {
   pages: RankedRow[];
 }
 
+export interface AltegioNamedMetric {
+  name: string;
+  value: number;
+}
+
+export interface AltegioReport {
+  summary: {
+    revenue: number;
+    previousRevenue: number;
+    revenueChangePercent: number;
+    serviceRevenue: number;
+    productRevenue: number;
+    averageCheck: number;
+    occupancyPercent: number;
+    previousOccupancyPercent: number;
+    totalAppointments: number;
+    previousTotalAppointments: number;
+    appointmentChangePercent: number;
+    onlineAppointments: number;
+    newClientAppointments: number;
+    completedAppointments: number;
+    pendingAppointments: number;
+    canceledAppointments: number;
+    noShows: number;
+  };
+  sources: AltegioNamedMetric[];
+  statuses: AltegioNamedMetric[];
+}
+
 export interface DashboardReport {
   range: DateRange;
   generatedAt: string;
   sources: {
     googleAnalytics: SourceResult<AnalyticsReport>;
-    googleAds: SourceResult<AdsReport>;
-    searchConsole: SourceResult<SearchConsoleReport>;
+      googleAds: SourceResult<AdsReport>;
+      searchConsole: SourceResult<SearchConsoleReport>;
+      altegio: SourceResult<AltegioReport>;
   };
 }

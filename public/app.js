@@ -18,9 +18,15 @@
   function euro(value) { return money.format(Number(value || 0)); }
   function decimal(value) { return number.format(Number(value || 0)); }
   function percent(value) { return decimal(Number(value || 0) * 100) + '%'; }
+  function percentValue(value) { return decimal(Number(value || 0)) + '%'; }
+  function change(value) { var amount = Number(value || 0); return (amount > 0 ? '+' : '') + decimal(amount) + '% к прошлому периоду'; }
+  function altegioName(value) {
+    var names = { 'Receptionist': 'Администратор', 'Company form. Mobile': 'Основная форма Altegio', 'Arrived': 'Пришли', 'Pending': 'Ожидаются', 'Confirmed': 'Подтверждены', 'No-show': 'Не пришли' };
+    return names[value] || String(value || '').replace(/\. Mobile$/, ' · мобильная форма');
+  }
 
   function sourceStatus(report) {
-    var labels = { googleAnalytics: 'Google Analytics', googleAds: 'Google Ads', searchConsole: 'Search Console' };
+    var labels = { googleAnalytics: 'Google Analytics', googleAds: 'Google Ads', altegio: 'Altegio', searchConsole: 'Search Console' };
     document.getElementById('source-status').innerHTML = Object.keys(labels).map(function (key) {
       var source = report.sources[key];
       var state = source.disabled ? ['Отложен', 'off'] : !source.configured ? ['Не подключён', 'off'] : source.error ? ['Ошибка', 'error'] : ['Работает', ''];
@@ -57,14 +63,22 @@
     var ads = report.sources.googleAds.data;
     var ga = report.sources.googleAnalytics.data;
     var search = report.sources.searchConsole.data;
+    var altegio = report.sources.altegio.data;
     var conversions = ads && ads.summary.conversions || 0;
     var spend = ads && ads.summary.spend || 0;
     value('kpi-spend', ads ? euro(spend) : '—');
     value('kpi-conversions', ads ? decimal(conversions) : '—');
-    value('kpi-cpa', ads && conversions ? euro(spend / conversions) : '—');
-    value('kpi-sessions', ga ? decimal(ga.summary.sessions) : '—');
-    value('kpi-organic', search ? decimal(search.summary.clicks) : '—');
-    value('kpi-roas', ads && spend ? decimal(ads.summary.conversionValue / spend) + '×' : '—');
+    value('kpi-revenue', altegio ? euro(altegio.summary.revenue) : '—');
+    value('kpi-revenue-note', altegio ? change(altegio.summary.revenueChangePercent) : 'Altegio');
+    value('kpi-appointments', altegio ? decimal(altegio.summary.totalAppointments) : '—');
+    value('kpi-appointments-note', altegio ? change(altegio.summary.appointmentChangePercent) : 'Altegio');
+    value('kpi-completed', altegio ? decimal(altegio.summary.completedAppointments) : '—');
+    value('kpi-completed-note', altegio && altegio.summary.totalAppointments ? percentValue(altegio.summary.completedAppointments / altegio.summary.totalAppointments * 100) + ' от всех записей' : 'Altegio');
+    value('kpi-online', altegio ? decimal(altegio.summary.onlineAppointments) : '—');
+    value('kpi-online-note', altegio && altegio.summary.totalAppointments ? percentValue(altegio.summary.onlineAppointments / altegio.summary.totalAppointments * 100) + ' от всех записей' : 'Altegio');
+    value('kpi-average-check', altegio ? euro(altegio.summary.averageCheck) : '—');
+    value('kpi-occupancy', altegio ? percentValue(altegio.summary.occupancyPercent) : '—');
+    value('kpi-occupancy-note', altegio ? 'Было ' + percentValue(altegio.summary.previousOccupancyPercent) : 'Рабочее время');
     sourceStatus(report);
     value('generated-at', 'Отчёт сформирован: ' + new Date(report.generatedAt).toLocaleString('ru-RU'));
     chart(ads ? ads.daily : []);
@@ -75,6 +89,9 @@
     ], 6);
     table('channels', ga ? ga.channels : [], [function (r) { return safe(r.name); }, function (r) { return decimal(r.sessions); }, function (r) { return decimal(r.keyEvents); }], 3);
     table('queries', search ? search.queries : [], [function (r) { return safe(r.name); }, function (r) { return decimal(r.organicClicks); }, function (r) { return decimal(r.organicImpressions); }, function (r) { return percent(r.ctr); }, function (r) { return decimal(r.position); }], 5);
+    table('altegio-sources', altegio ? altegio.sources.slice(0, 15) : [], [function (r) { return safe(altegioName(r.name)); }, function (r) { return decimal(r.value); }], 2);
+    table('altegio-statuses', altegio ? altegio.statuses : [], [function (r) { return safe(altegioName(r.name)); }, function (r) { return decimal(r.value); }], 2);
+    value('altegio-cancel-note', altegio ? 'Отменено: ' + decimal(altegio.summary.canceledAppointments) + ' · No-show: ' + decimal(altegio.summary.noShows) + ' · Записи новых клиентов: ' + decimal(altegio.summary.newClientAppointments) : '');
     var disconnected = Object.keys(report.sources).filter(function (key) { return !report.sources[key].configured && !report.sources[key].disabled; });
     notice.classList.toggle('hidden', disconnected.length === 0);
     if (disconnected.length) notice.textContent = 'Панель готова к подключению. Сейчас необходимо выдать сервисному аккаунту Google доступ к источникам данных.';

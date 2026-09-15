@@ -1,5 +1,6 @@
 import type { AppConfig } from './config.js';
-import { hasGoogleCredentials } from './config.js';
+import { hasAltegioCredentials, hasGoogleCredentials } from './config.js';
+import { fetchAltegio } from './providers/altegio.js';
 import { fetchGoogleAds } from './providers/google-ads.js';
 import { fetchGoogleAnalytics } from './providers/google-analytics.js';
 import { fetchSearchConsole } from './providers/search-console.js';
@@ -25,6 +26,7 @@ export class DashboardService {
         this.config.searchConsoleEnabled &&
         credentials &&
         Boolean(this.config.searchConsoleSiteUrl),
+      altegio: hasAltegioCredentials(this.config),
     };
   }
 
@@ -34,7 +36,7 @@ export class DashboardService {
     if (!refresh && cached && cached.expiresAt > Date.now()) return cached.report;
 
     const status = this.status();
-    const [googleAnalytics, googleAds, searchConsole] = await Promise.all([
+    const [googleAnalytics, googleAds, searchConsole, altegio] = await Promise.all([
       this.runSource(status.googleAnalytics, () => fetchGoogleAnalytics(this.config, range)),
       this.runSource(status.googleAds, () => fetchGoogleAds(this.config, range)),
       this.runSource(
@@ -42,11 +44,12 @@ export class DashboardService {
         () => fetchSearchConsole(this.config, range),
         !status.searchConsoleEnabled,
       ),
+      this.runSource(status.altegio, () => fetchAltegio(this.config, range)),
     ]);
     const report: DashboardReport = {
       range,
       generatedAt: new Date().toISOString(),
-      sources: { googleAnalytics, googleAds, searchConsole },
+      sources: { googleAnalytics, googleAds, searchConsole, altegio },
     };
     this.cache.set(key, {
       expiresAt: Date.now() + this.config.cacheTtlSec * 1000,

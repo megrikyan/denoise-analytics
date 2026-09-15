@@ -15,6 +15,7 @@ export interface AppConfig {
   cacheTtlSec: number;
   maxDays: number;
   altegioWebhookPartnerTokenSha256: string | null;
+  altegioCredentialsPath: string;
 }
 
 function optional(name: string): string | null {
@@ -68,9 +69,15 @@ export function loadConfig(): AppConfig {
     maxDays: positiveInteger('REPORT_MAX_DAYS', 366),
     altegioWebhookPartnerTokenSha256:
       altegioWebhookPartnerTokenSha256?.toLowerCase() ?? null,
+    altegioCredentialsPath:
+      optional('ALTEGIO_CREDENTIALS_PATH') ?? '/run/secrets/altegio-credentials.json',
   };
 }
 
 export function hasGoogleCredentials(config: AppConfig): boolean {
   return existsSync(config.credentialsPath);
+}
+
+export function hasAltegioCredentials(config: AppConfig): boolean {
+  return existsSync(config.altegioCredentialsPath);
 }

@@ -32,6 +32,10 @@ cd /opt/denoise-analytics
 - `.env` должен иметь права `0600`;
 - `secrets/` — `root:1000`, права `0750`;
 - `secrets/google-service-account.json` — `root:1000`, права `0640`;
+- `secrets/altegio-credentials.json` — `root:1000`, права `0640`; содержит только
+  Partner Token, User Token и location ID. Сам provider выполняет исключительно
+  read-only запросы агрегатов; текущий token также используется формой записи и
+  пока не является отдельным read-only credential;
 - пароль панели ротируется заменой `DASHBOARD_PASSWORD` в `.env` с последующим deploy.
 - `ALTEGIO_WEBHOOK_PARTNER_TOKEN_SHA256` — SHA-256 от Partner Token приложения
   Altegio. Исходный токен в этом проекте не хранится.
@@ -44,6 +48,21 @@ cd /opt/denoise-analytics
   токена;
 - payload не сохраняется, персональные данные клиентов endpoint не принимает;
 - при корректном запросе возвращается `204`, остальные методы/форматы отклоняются.
+
+## Altegio reporting secret
+
+Разовая миграция действующих credentials из booking-проекта выполняется без
+печати токенов в терминал:
+
+```bash
+cd /opt/denoise-analytics
+./scripts/provision-altegio-secret.sh
+./scripts/deploy.sh
+```
+
+Скрипт создаёт отдельную копию только трёх нужных значений. Analytics container
+не монтирует `.env` booking-проекта. При ротации токена скрипт запускается
+повторно, затем контейнер пересоздаётся.
 
 ## Диагностика
 
