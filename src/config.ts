@@ -14,6 +14,7 @@ export interface AppConfig {
   googleAdsApiVersion: string;
   cacheTtlSec: number;
   maxDays: number;
+  altegioWebhookPartnerTokenSha256: string | null;
 }
 
 function optional(name: string): string | null {
@@ -40,6 +41,14 @@ export function loadConfig(): AppConfig {
     throw new Error('DASHBOARD_USERNAME and a non-default DASHBOARD_PASSWORD are required.');
   }
 
+  const altegioWebhookPartnerTokenSha256 = optional('ALTEGIO_WEBHOOK_PARTNER_TOKEN_SHA256');
+  if (
+    altegioWebhookPartnerTokenSha256 &&
+    !/^[a-f0-9]{64}$/i.test(altegioWebhookPartnerTokenSha256)
+  ) {
+    throw new Error('ALTEGIO_WEBHOOK_PARTNER_TOKEN_SHA256 must be a SHA-256 hex digest.');
+  }
+
   return {
     port: positiveInteger('PORT', 8080),
     logLevel: optional('LOG_LEVEL') ?? 'info',
@@ -57,6 +66,8 @@ export function loadConfig(): AppConfig {
     googleAdsApiVersion: optional('GOOGLE_ADS_API_VERSION') ?? 'v25',
     cacheTtlSec: positiveInteger('REPORT_CACHE_TTL_SEC', 900),
     maxDays: positiveInteger('REPORT_MAX_DAYS', 366),
+    altegioWebhookPartnerTokenSha256:
+      altegioWebhookPartnerTokenSha256?.toLowerCase() ?? null,
   };
 }
 

@@ -33,6 +33,17 @@ cd /opt/denoise-analytics
 - `secrets/` — `root:1000`, права `0750`;
 - `secrets/google-service-account.json` — `root:1000`, права `0640`;
 - пароль панели ротируется заменой `DASHBOARD_PASSWORD` в `.env` с последующим deploy.
+- `ALTEGIO_WEBHOOK_PARTNER_TOKEN_SHA256` — SHA-256 от Partner Token приложения
+  Altegio. Исходный токен в этом проекте не хранится.
+
+## Altegio application webhook
+
+- URL для Developer Account: `https://analytics.denoisebcn.com/api/webhooks/altegio`;
+- endpoint принимает только `POST` с событиями `uninstall` и `freeze`;
+- подлинность запроса проверяется по `partner_token` из payload без хранения самого
+  токена;
+- payload не сохраняется, персональные данные клиентов endpoint не принимает;
+- при корректном запросе возвращается `204`, остальные методы/форматы отклоняются.
 
 ## Диагностика
 

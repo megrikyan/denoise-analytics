@@ -3,6 +3,7 @@ import Fastify from 'fastify';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { basicAuth } from './auth.js';
+import { verifyAltegioLifecycleWebhook } from './altegio-webhook.js';
 import { loadConfig } from './config.js';
 import { DashboardService } from './dashboard.js';
 import { parseDateRange } from './date-range.js';
@@ -27,6 +28,32 @@ app.addHook('onSend', async (_request, reply, payload) => {
 app.get('/health', async () => ({ ok: true }));
 app.get('/ready', async () => ({ ok: true, sources: dashboard.status() }));
 app.get('/api/status', async () => ({ sources: dashboard.status() }));
+app.post('/api/webhooks/altegio', async (request, reply) => {
+  if (!config.altegioWebhookPartnerTokenSha256) {
+    request.log.error('Altegio lifecycle webhook is not configured');
+    return reply.code(503).send({ error: 'Webhook is not configured.' });
+  }
+
+  const result = verifyAltegioLifecycleWebhook(
+    request.body,
+    config.altegioWebhookPartnerTokenSha256,
+  );
+  if (!result.ok) {
+    return reply
+      .code(result.reason === 'invalid_token' ? 401 : 400)
+      .send({ error: 'Invalid webhook request.' });
+  }
+
+  request.log.warn(
+    {
+      salonId: result.value.salonId,
+      applicationId: result.value.applicationId,
+      event: result.value.event,
+    },
+    'Altegio application lifecycle event received',
+  );
+  return reply.code(204).send();
+});
 app.get<{
   Querystring: { startDate?: string; endDate?: string; refresh?: string };
 }>('/api/dashboard', async (request, reply) => {

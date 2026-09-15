@@ -9,7 +9,13 @@ function equal(left: string, right: string): boolean {
 
 export function basicAuth(username: string, password: string) {
   return async function authenticate(request: FastifyRequest, reply: FastifyReply) {
-    if (request.url === '/health' || request.url === '/ready') return;
+    if (
+      request.url === '/health' ||
+      request.url === '/ready' ||
+      (request.method === 'POST' && request.url === '/api/webhooks/altegio')
+    ) {
+      return;
+    }
     const authorization = request.headers.authorization;
     if (authorization?.startsWith('Basic ')) {
       try {
@@ -28,4 +34,3 @@ export function basicAuth(username: string, password: string) {
     return reply.code(401).send({ error: 'Authentication required.' });
   };
 }
-
