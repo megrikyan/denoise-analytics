@@ -29,3 +29,5 @@
 - [Модель метрик](docs/metrics.md)
 - [Первичный аудит tracking](docs/tracking-audit-2026-09.md)
 - [Аудит Google Ads](docs/ads-audit-2026-09.md)
+- [Итоги Google Ads за 12 месяцев](docs/year-review-2025-09-to-2026-09.md)
+- [Доступ к Altegio для аналитики](docs/altegio-access.md)
