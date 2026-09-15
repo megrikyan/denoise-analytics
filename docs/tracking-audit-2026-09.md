@@ -12,6 +12,7 @@
 Полученные идентификаторы:
 
 - GA account ID: `318135024`;
+- основной GA4 property ID: `446056209`;
 - основной web stream: `DENOISE`, stream ID `8262999383`, measurement ID `G-N633FDVBH6`;
 - `G-TFKJTBTJKV` относится к прежнему сценарию записи на стороне Altegio и является кандидатом на удаление из основного сайта;
 - Google Ads customer ID: `214-463-1342`;

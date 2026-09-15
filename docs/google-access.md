@@ -26,6 +26,13 @@ denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
 
 В GA4 откройте **Admin → Property access management**, добавьте email service account с ролью Viewer и сообщите числовой `Property ID`. Панель использует Analytics Data API и не изменяет property.
 
+Production property:
+
+```text
+Property ID: 446056209
+Stream: DENOISE / 8262999383 / G-N633FDVBH6
+```
+
 Официальная инструкция: https://developers.google.com/analytics/devguides/reporting/data/v1/quickstart
 
 ## Search Console
@@ -43,6 +50,8 @@ denoise-analytics-reader@denoise-analytics.iam.gserviceaccount.com
 - доступ service account к рекламному или manager account.
 
 С 9 сентября 2026 года developer token упразднён. Уровень API-доступа теперь назначается Google Cloud project, которому принадлежит service account. Для чтения production-аккаунта проект должен получить как минимум **Explorer access** на странице Google Ads API Overview в Cloud Console. Панель использует Google Ads API `v25` и только отчётные `SELECT`-запросы.
+
+Production customer ID: `214-463-1342`.
 
 Официальная инструкция: https://developers.google.com/google-ads/api/docs/get-started/make-first-call
 
