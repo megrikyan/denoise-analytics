@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { composeAltegioReport } from './altegio.js';
+import { composeAltegioReport, summarizePayments } from './altegio.js';
 
 test('composes business-safe Altegio aggregates', () => {
   const report = composeAltegioReport(
@@ -57,4 +57,40 @@ test('composes business-safe Altegio aggregates', () => {
     noShows: 1,
   });
   assert.deepEqual(report.sources[0], { name: 'Receptionist', value: 8 });
+  assert.deepEqual(report.payments, {
+    cash: 0,
+    cashless: 0,
+    other: 0,
+    total: 0,
+    cashTransactions: 0,
+    cashlessTransactions: 0,
+    otherTransactions: 0,
+  });
+});
+
+test('separates positive payments by Altegio account type', () => {
+  assert.deepEqual(
+    summarizePayments(
+      [
+        { id: 1, type: 0 },
+        { id: 2, type: 1 },
+      ],
+      [
+        { amount: 20.1, account: { id: 1 } },
+        { amount: 30.2, account: { id: 2 } },
+        { amount: 4.5, account: { id: 2 } },
+        { amount: -10, account: { id: 1 } },
+        { amount: 3, account: { id: 999 } },
+      ],
+    ),
+    {
+      cash: 20.1,
+      cashless: 34.7,
+      other: 3,
+      total: 57.8,
+      cashTransactions: 1,
+      cashlessTransactions: 2,
+      otherTransactions: 1,
+    },
+  );
 });

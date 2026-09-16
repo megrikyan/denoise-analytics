@@ -84,6 +84,16 @@ export interface AltegioNamedMetric {
   value: number;
 }
 
+export interface AltegioPaymentSummary {
+  cash: number;
+  cashless: number;
+  other: number;
+  total: number;
+  cashTransactions: number;
+  cashlessTransactions: number;
+  otherTransactions: number;
+}
+
 export interface AltegioReport {
   summary: {
     revenue: number;
@@ -104,6 +114,7 @@ export interface AltegioReport {
     canceledAppointments: number;
     noShows: number;
   };
+  payments: AltegioPaymentSummary;
   sources: AltegioNamedMetric[];
   statuses: AltegioNamedMetric[];
 }
@@ -113,8 +124,8 @@ export interface DashboardReport {
   generatedAt: string;
   sources: {
     googleAnalytics: SourceResult<AnalyticsReport>;
-      googleAds: SourceResult<AdsReport>;
-      searchConsole: SourceResult<SearchConsoleReport>;
-      altegio: SourceResult<AltegioReport>;
+    googleAds: SourceResult<AdsReport>;
+    searchConsole: SourceResult<SearchConsoleReport>;
+    altegio: SourceResult<AltegioReport>;
   };
 }

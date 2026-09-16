@@ -1,6 +1,11 @@
 import { readFileSync } from 'node:fs';
 import type { AppConfig } from '../config.js';
-import type { AltegioNamedMetric, AltegioReport, DateRange } from '../types.js';
+import type {
+  AltegioNamedMetric,
+  AltegioPaymentSummary,
+  AltegioReport,
+  DateRange,
+} from '../types.js';
 
 interface AltegioCredentials {
   partnerToken: string;
@@ -47,6 +52,44 @@ interface ScalarSeries {
   data?: number;
 }
 
+interface AccountsEnvelope {
+  success?: boolean;
+  data?: Array<{ id?: number; type?: number }>;
+}
+
+interface TransactionsEnvelope {
+  success?: boolean;
+  data?: Array<{
+    amount?: number;
+    account?: { id?: number };
+  }>;
+}
+
+const emptyPayments = (): AltegioPaymentSummary => ({
+  cash: 0,
+  cashless: 0,
+  other: 0,
+  total: 0,
+  cashTransactions: 0,
+  cashlessTransactions: 0,
+  otherTransactions: 0,
+});
+
+let requestQueue: Promise<unknown> = Promise.resolve();
+
+function scheduledFetch(url: string, init: RequestInit): Promise<Response> {
+  const result = requestQueue.then(async () => {
+    const response = await fetch(url, init);
+    await new Promise((resolve) => setTimeout(resolve, 220));
+    return response;
+  });
+  requestQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
+
 function numberValue(value: unknown): number {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -75,7 +118,7 @@ function errorMessage(body: unknown): string {
 }
 
 async function request<T>(path: string, credentials: AltegioCredentials): Promise<T> {
-  const response = await fetch(`https://api.alteg.io/api/v1${path}`, {
+  const response = await scheduledFetch(`https://api.alteg.io/api/v1${path}`, {
     headers: {
       Accept: 'application/vnd.api.v2+json',
       Authorization: `Bearer ${credentials.partnerToken}, User ${credentials.userToken}`,
@@ -88,6 +131,92 @@ async function request<T>(path: string, credentials: AltegioCredentials): Promis
     throw new Error(`Altegio API returned ${response.status}${detail ? `: ${detail}` : ''}.`);
   }
   return body;
+}
+
+function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function summarizePayments(
+  accounts: Array<{ id?: number; type?: number }>,
+  transactions: Array<{ amount?: number; account?: { id?: number } }>,
+): AltegioPaymentSummary {
+  const accountTypes = new Map(
+    accounts
+      .filter((account) => Number.isInteger(account.id))
+      .map((account) => [Number(account.id), Number(account.type)]),
+  );
+  const result = emptyPayments();
+
+  for (const transaction of transactions) {
+    const amount = numberValue(transaction.amount);
+    if (amount <= 0) continue;
+    const accountType = accountTypes.get(Number(transaction.account?.id));
+    if (accountType === 0) {
+      result.cash += amount;
+      result.cashTransactions += 1;
+    } else if (accountType === 1) {
+      result.cashless += amount;
+      result.cashlessTransactions += 1;
+    } else {
+      result.other += amount;
+      result.otherTransactions += 1;
+    }
+  }
+
+  result.cash = roundMoney(result.cash);
+  result.cashless = roundMoney(result.cashless);
+  result.other = roundMoney(result.other);
+  result.total = roundMoney(result.cash + result.cashless + result.other);
+  return result;
+}
+
+async function fetchPayments(
+  credentials: AltegioCredentials,
+  range: DateRange,
+): Promise<AltegioPaymentSummary> {
+  const accounts = await request<AccountsEnvelope>(
+    `/accounts/${credentials.companyId}`,
+    credentials,
+  );
+  if (!accounts.success || !Array.isArray(accounts.data)) {
+    throw new Error('Altegio accounts response is invalid.');
+  }
+
+  const payments = emptyPayments();
+  const pageSize = 1000;
+  for (let page = 1; page <= 50; page += 1) {
+    const query = new URLSearchParams({
+      page: String(page),
+      count: String(pageSize),
+      real_money: '1',
+      deleted: '0',
+      start_date: range.startDate.replaceAll('-', ''),
+      end_date: range.endDate.replaceAll('-', ''),
+    });
+    const response = await request<TransactionsEnvelope>(
+      `/transactions/${credentials.companyId}?${query}`,
+      credentials,
+    );
+    if (!response.success || !Array.isArray(response.data)) {
+      throw new Error('Altegio transactions response is invalid.');
+    }
+    const pagePayments = summarizePayments(accounts.data, response.data);
+    payments.cash += pagePayments.cash;
+    payments.cashless += pagePayments.cashless;
+    payments.other += pagePayments.other;
+    payments.cashTransactions += pagePayments.cashTransactions;
+    payments.cashlessTransactions += pagePayments.cashlessTransactions;
+    payments.otherTransactions += pagePayments.otherTransactions;
+    if (response.data.length < pageSize) break;
+    if (page === 50) throw new Error('Altegio transaction pagination limit reached.');
+  }
+
+  payments.cash = roundMoney(payments.cash);
+  payments.cashless = roundMoney(payments.cashless);
+  payments.other = roundMoney(payments.other);
+  payments.total = roundMoney(payments.cash + payments.cashless + payments.other);
+  return payments;
 }
 
 function totalSeries(rows: DailySeries[], patterns: RegExp[], fallbackIndex: number): number {
@@ -109,6 +238,7 @@ export function composeAltegioReport(
   appointmentSeries: DailySeries[],
   sourceSeries: ScalarSeries[],
   statusSeries: ScalarSeries[],
+  payments: AltegioPaymentSummary = emptyPayments(),
 ): AltegioReport {
   if (!overall.success || !overall.data) throw new Error('Altegio overall report is invalid.');
   const stats = overall.data;
@@ -136,6 +266,7 @@ export function composeAltegioReport(
       canceledAppointments: numberValue(record.current_canceled_count),
       noShows,
     },
+    payments,
     sources: namedMetrics(sourceSeries),
     statuses,
   };
@@ -163,6 +294,7 @@ export async function fetchAltegio(
     `${prefix}/charts/record_status?${query}`,
     credentials,
   );
+  const payments = await fetchPayments(credentials, range);
 
-  return composeAltegioReport(overall, appointments, sources, statuses);
+  return composeAltegioReport(overall, appointments, sources, statuses, payments);
 }

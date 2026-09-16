@@ -5,6 +5,7 @@
   var refreshButton = document.getElementById('refresh');
   var notice = document.getElementById('notice');
   var money = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  var moneyDetailed = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
   var number = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
 
   function iso(date) { return date.toISOString().slice(0, 10); }
@@ -16,6 +17,7 @@
   function value(id, text) { document.getElementById(id).textContent = text; }
   function safe(value) { var node = document.createElement('span'); node.textContent = String(value == null ? '' : value); return node.innerHTML; }
   function euro(value) { return money.format(Number(value || 0)); }
+  function euroDetailed(value) { return moneyDetailed.format(Number(value || 0)); }
   function decimal(value) { return number.format(Number(value || 0)); }
   function percent(value) { return decimal(Number(value || 0) * 100) + '%'; }
   function percentValue(value) { return decimal(Number(value || 0)) + '%'; }
@@ -59,6 +61,23 @@
     root.innerHTML = '<svg viewBox="0 0 900 250" role="img"><line class="gridline" x1="28" y1="28" x2="872" y2="28"/><line class="gridline" x1="28" y1="125" x2="872" y2="125"/><line class="gridline" x1="28" y1="222" x2="872" y2="222"/><polyline class="spend-line" points="' + points('spend', maxSpend) + '"/><polyline class="conversion-line" points="' + points('conversions', maxConversions) + '"/>' + labels + '</svg>';
   }
 
+  function renderPayments(altegio) {
+    var payments = altegio && altegio.payments;
+    var total = payments && payments.total || 0;
+    var cashShare = total ? payments.cash / total * 100 : 0;
+    var cashlessShare = total ? payments.cashless / total * 100 : 0;
+    value('payment-total', payments ? euroDetailed(total) : '—');
+    value('payment-cash', payments ? euroDetailed(payments.cash) : '—');
+    value('payment-cashless', payments ? euroDetailed(payments.cashless) : '—');
+    value('payment-cash-note', payments ? percentValue(cashShare) + ' · ' + decimal(payments.cashTransactions) + ' операций' : '—');
+    value('payment-cashless-note', payments ? percentValue(cashlessShare) + ' · ' + decimal(payments.cashlessTransactions) + ' операций' : 'Карты и эквайринг');
+    document.getElementById('payment-cash-bar').style.width = cashShare + '%';
+    document.getElementById('payment-cashless-bar').style.width = cashlessShare + '%';
+    var other = payments && payments.other || 0;
+    var difference = payments && altegio ? Math.abs(altegio.summary.revenue - total) : 0;
+    value('payment-note', payments ? 'Учитываются положительные денежные операции; расходы и возвраты не включены.' + (other ? ' Другие способы: ' + euroDetailed(other) + '.' : '') + (difference >= 0.01 ? ' Разница с выручкой Altegio: ' + euroDetailed(difference) + ' (исторические корректировки или непривязанные оплаты).' : '') : 'Данные об оплатах пока недоступны.');
+  }
+
   function render(report) {
     var ads = report.sources.googleAds.data;
     var ga = report.sources.googleAnalytics.data;
@@ -79,6 +98,7 @@
     value('kpi-average-check', altegio ? euro(altegio.summary.averageCheck) : '—');
     value('kpi-occupancy', altegio ? percentValue(altegio.summary.occupancyPercent) : '—');
     value('kpi-occupancy-note', altegio ? 'Было ' + percentValue(altegio.summary.previousOccupancyPercent) : 'Рабочее время');
+    renderPayments(altegio);
     sourceStatus(report);
     value('generated-at', 'Отчёт сформирован: ' + new Date(report.generatedAt).toLocaleString('ru-RU'));
     chart(ads ? ads.daily : []);

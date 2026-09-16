@@ -52,6 +52,9 @@ online-записей, 1 955 состоявшихся визитов, 466 отм
 - `GET /company/{location_id}/analytics/overall/charts/record_source`;
 - `GET /company/{location_id}/analytics/overall/charts/record_status`;
 - `GET /company/{location_id}/analytics/overall/charts/fullness_daily`.
+- `GET /accounts/{location_id}` — классификация счетов: наличные/безналичные;
+- `GET /transactions/{location_id}` — только для суммирования положительных
+  оплат по счёту; клиентские поля отбрасываются и не сохраняются.
 
 Эти методы возвращают агрегаты и не требуют передавать в панель контакты
 клиентов. Официальное описание Business Management API:

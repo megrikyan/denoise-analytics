@@ -35,6 +35,29 @@
         <article class="kpi"><span>Google conversions</span><strong id="kpi-conversions">—</strong><small>Не равны реальным записям</small></article>
       </section>
 
+      <section class="panel payment-panel" aria-labelledby="payment-title">
+        <div class="panel-head payment-heading">
+          <div><p class="eyebrow">Altegio · оплаты</p><h2 id="payment-title">Наличные и безналичные</h2><p class="panel-note">Как клиенты оплачивали услуги и товары за выбранный период.</p></div>
+          <div class="payment-total"><span>Всего оплачено</span><strong id="payment-total">—</strong></div>
+        </div>
+        <div class="payment-methods">
+          <article class="payment-method cash">
+            <div><span class="payment-dot"></span><strong>Наличными</strong></div>
+            <b id="payment-cash">—</b>
+            <small id="payment-cash-note">—</small>
+          </article>
+          <article class="payment-method cashless">
+            <div><span class="payment-dot"></span><strong>Безналично</strong></div>
+            <b id="payment-cashless">—</b>
+            <small id="payment-cashless-note">Карты и эквайринг</small>
+          </article>
+        </div>
+        <div class="payment-bar" aria-label="Соотношение способов оплаты">
+          <span id="payment-cash-bar" class="cash"></span><span id="payment-cashless-bar" class="cashless"></span>
+        </div>
+        <p id="payment-note" class="timestamp">Учитываются положительные денежные операции; расходы и возвраты не включены.</p>
+      </section>
+
       <section class="grid two equal">
         <article class="panel">
           <div class="panel-head"><div><p class="eyebrow">Altegio</p><h2>Источники записей</h2></div></div>
